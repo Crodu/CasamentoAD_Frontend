@@ -68,7 +68,8 @@ const Presentes = ({onGiftClick}) => {
               component="img"
               height="140"
               image={
-                "https://media.cntraveler.com/photos/67c1fd71845ddb32cad31bcc/16:9/w_1920%2Cc_limit/KAPE%2520Paris%2520%25C2%25A9%2520The%2520Travel%2520Buds_20231120-TheTravelBudsxPixiset-55.jpg"
+                gift.link ||
+                'https://placehold.co/600x400?text=Imagem+Indisponível'
               }
               alt={gift.name}
             />

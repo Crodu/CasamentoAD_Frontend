@@ -3,6 +3,9 @@ import axios from 'axios';
 const getBaseURL = () => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
+    if (hostname === 'localhost') {
+      return 'http://localhost:8080'; // Local development
+    }
     // const port = '8080'; // Keep the existing port
     return `http://api.${hostname}`;
   }

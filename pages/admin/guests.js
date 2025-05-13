@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import { useRouter } from 'next/router';
 import { getSessionToken } from '@/app/api/session';
 import api from '@/app/api/actions';
+import AdminLayout from './layout';
 
 const NewGuest = () => {
   const [guests, setGuests] = useState([]);
@@ -120,4 +121,10 @@ const NewGuest = () => {
   );
 };
 
-export default NewGuest;
+export default function Guests() {
+  return (
+    <AdminLayout>
+      <NewGuest />
+    </AdminLayout>
+  );
+}

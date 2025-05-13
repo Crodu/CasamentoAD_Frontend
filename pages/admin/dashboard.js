@@ -1,8 +1,21 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getSessionToken } from '@/app/api/session';
+import AdminLayout from '@/pages/admin/layout';
+import Link from 'next/link';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Container,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Box,
+} from '@mui/material';
 
-const Dashboard = () => {
+function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
@@ -13,18 +26,32 @@ const Dashboard = () => {
   }, [router]);
 
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <ul>
-        <li>
-          <a href="/admin/guests">New Guest</a>
-        </li>
-        <li>
-          <a href="/admin/new-gift">New Gift</a>
-        </li>
-      </ul>
-    </div>
+    <Box>
+      <Container sx={{ mt: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Welcome to the Admin Dashboard
+        </Typography>
+        <List>
+          <ListItem>
+            <Button variant="contained" color="primary" component={Link} href="/admin/guests">
+              New Guest
+            </Button>
+          </ListItem>
+          <ListItem>
+            <Button variant="contained" color="secondary" component={Link} href="/admin/gifts">
+              New Gift
+            </Button>
+          </ListItem>
+        </List>
+      </Container>
+    </Box>
   );
 };
 
-export default Dashboard;
+export default function AdminDashboard() {
+  return (
+    <AdminLayout>
+      <Dashboard />
+    </AdminLayout>
+  );
+}
