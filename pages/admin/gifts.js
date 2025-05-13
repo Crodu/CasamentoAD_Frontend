@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, Tooltip } from '@mui/material';
+import { Grid, Button, TextField, Tooltip, Typography, Card, CardContent, CardActions } from '@mui/material';
 import { useRouter } from 'next/router';
 import { getSessionToken } from '@/app/api/session';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import api from '@/app/api/actions';
 import AdminLayout from './layout';
+import { useMediaQuery } from '@mui/material';
 
 const NewGift = () => {
   const [gifts, setGifts] = useState([]);
   const router = useRouter();
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   useEffect(() => {
     const token = getSessionToken();
@@ -18,7 +20,6 @@ const NewGift = () => {
   }, [router]);
 
   useEffect(() => {
-    // Fetch gifts from the API
     api.get('/gifts')
       .then((response) => {
         setGifts(response.data.map(
@@ -41,7 +42,6 @@ const NewGift = () => {
       updatedGifts[giftIndex] = { ...updatedGift, is_editing: false };
 
       if (id < 0) {
-        // New gift (temporary ID), save to API
         api.post('/gifts', updatedGift)
           .then((response) => {
             updatedGifts[giftIndex] = { ...response.data, is_editing: false };
@@ -51,7 +51,6 @@ const NewGift = () => {
             console.error('Error saving new gift:', error);
           });
       } else {
-        // Existing gift, update API
         api.put(`/gifts/${id}`, updatedGift)
           .then(() => {
             setGifts(updatedGifts);
@@ -71,7 +70,6 @@ const NewGift = () => {
 
   const handleCancelEdit = (id) => {
     if (id < 0) {
-      // Remove unsaved new gift
       setGifts(gifts.filter((gift) => gift.id !== id));
     } else {
       setGifts(gifts.map((gift) =>
@@ -94,7 +92,7 @@ const NewGift = () => {
       });
   };
 
-  const EditableRow = ({ gift }) => {
+  const EditableCard = ({ gift }) => {
     const [localGift, setLocalGift] = useState({ ...gift });
 
     const handleLocalChange = (e) => {
@@ -106,40 +104,42 @@ const NewGift = () => {
     };
 
     return (
-      <TableRow>
-        <TableCell>
+      <Card>
+        <CardContent>
           <TextField
             name="name"
             value={localGift.name}
             onChange={handleLocalChange}
             placeholder="Name"
+            fullWidth
+            margin="dense"
           />
-        </TableCell>
-        <TableCell>
           <TextField
             name="description"
             value={localGift.description}
             onChange={handleLocalChange}
             placeholder="Description"
+            fullWidth
+            margin="dense"
           />
-        </TableCell>
-        <TableCell>
           <TextField
             name="price"
             value={localGift.price}
             onChange={handleLocalChange}
             placeholder="Price"
+            fullWidth
+            margin="dense"
           />
-        </TableCell>
-        <TableCell>
           <TextField
             name="link"
             value={localGift.link}
             onChange={handleLocalChange}
             placeholder="Link"
+            fullWidth
+            margin="dense"
           />
-        </TableCell>
-        <TableCell>
+        </CardContent>
+        <CardActions>
           <Button
             variant="contained"
             color="secondary"
@@ -154,78 +154,68 @@ const NewGift = () => {
           >
             Cancel
           </Button>
-        </TableCell>
-      </TableRow>
+        </CardActions>
+      </Card>
     );
   };
 
-  const DisplayRow = ({ gift }) => {
-    const truncateText = (text, maxLength) => 
+  const DisplayCard = ({ gift }) => {
+    const truncateText = (text, maxLength) =>
       text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 
     const [copiedLink, setCopiedLink] = useState(null);
 
     const handleCopyLink = (link) => {
       navigator.clipboard.writeText(link).then(() => {
-      setCopiedLink(link);
-      setTimeout(() => setCopiedLink(null), 2000); // Reset after 2 seconds
+        setCopiedLink(link);
+        setTimeout(() => setCopiedLink(null), 2000);
       }).catch((error) => {
-      console.error('Error copying link:', error);
+        console.error('Error copying link:', error);
       });
     };
 
     return (
-      <TableRow>
-      <TableCell>{truncateText(gift.name, 50)}</TableCell>
-      <TableCell>{truncateText(gift.description, 50)}</TableCell>
-      <TableCell>{gift.price}</TableCell>
-      <TableCell>
-        {truncateText(gift.link, 50)}
-        <Tooltip title={'Copied!'} open={copiedLink === gift.link}>
-        <Button onClick={() => handleCopyLink(gift.link)}>
-          <ContentCopyIcon />
-        </Button>
-        </Tooltip>
-      </TableCell>
-      <TableCell>
-        <Button variant="contained" color="secondary" onClick={() => handleEditGift(gift.id)}>
-        Edit
-        </Button>
-        <Button variant="contained" color="error" onClick={() => handleDeleteGift(gift.id)}>
-        Delete
-        </Button>
-      </TableCell>
-      </TableRow>
+      <Card>
+        <CardContent>
+          <Typography variant="h6">{truncateText(gift.name, 50)}</Typography>
+          <Typography variant="body2">{truncateText(gift.description, 100)}</Typography>
+          <Typography variant="body1">Price: {gift.price}</Typography>
+          <Typography variant="body2"></Typography>
+            Link: {truncateText(gift.link, 50)}
+            <Tooltip title={'Copied!'} open={copiedLink === gift.link}>
+              <Button onClick={() => handleCopyLink(gift.link)}>
+                <ContentCopyIcon />
+              </Button>
+            </Tooltip>
+        </CardContent>
+        <CardActions>
+          <Button variant="contained" color="secondary" onClick={() => handleEditGift(gift.id)}>
+            Edit
+          </Button>
+          <Button variant="contained" color="error" onClick={() => handleDeleteGift(gift.id)}>
+            Delete
+          </Button>
+        </CardActions>
+      </Card>
     );
   };
 
   return (
     <>
-      <Button variant="contained" color="primary" onClick={handleAddNewGift}>
+      <Button variant="contained" color="primary" onClick={handleAddNewGift} fullWidth={isMobile}>
         Add New Gift
       </Button>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>Link</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {gifts.map((gift) =>
-              gift.is_editing ? (
-                <EditableRow key={gift.id} gift={gift} />
-              ) : (
-                <DisplayRow key={gift.id} gift={gift} />
-              )
+      <Grid container spacing={2} style={{ marginTop: 16 }}>
+        {gifts.map((gift) =>
+          <Grid item xs={12} sm={6} md={4} key={gift.id}>
+            {gift.is_editing ? (
+              <EditableCard gift={gift} />
+            ) : (
+              <DisplayCard gift={gift} />
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </Grid>
+        )}
+      </Grid>
     </>
   );
 };
