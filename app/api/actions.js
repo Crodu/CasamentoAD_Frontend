@@ -7,7 +7,7 @@ const getBaseURL = () => {
       return 'http://localhost:8080'; // Local development
     }
     // const port = '8080'; // Keep the existing port
-    return `http://api.${hostname}`;
+    return `https://api.${hostname}`;
   }
   return 'http://localhost:8080'; // Fallback for non-browser environments
 };
