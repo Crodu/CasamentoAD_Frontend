@@ -31,7 +31,7 @@ const NewGift = () => {
   }, []);
 
   const handleAddNewGift = () => {
-    setGifts([...gifts, { id: Date.now(), name: '', description: '', price: '', link: '', is_editing: true }]);
+    setGifts([...gifts, { id: -1, name: '', description: '', price: '', link: '', is_editing: true }]);
   };
 
   const handleSaveGift = (id, updatedGift) => {
@@ -94,56 +94,70 @@ const NewGift = () => {
       });
   };
 
-  const handleInputChange = (id, name, value) => {
-    setGifts(gifts.map((gift) =>
-      gift.id === id ? { ...gift, [name]: name === 'price' ? parseFloat(value) || '' : value } : gift
-    ));
-  };
+  const EditableRow = ({ gift }) => {
+    const [localGift, setLocalGift] = useState({ ...gift });
 
-  const EditableRow = ({ gift }) => (
-    <TableRow>
-      <TableCell>
-        <TextField
-          name="name"
-          value={gift.name}
-          onChange={(e) => handleInputChange(gift.id, e.target.name, e.target.value)}
-          placeholder="Name"
-        />
-      </TableCell>
-      <TableCell>
-        <TextField
-          name="description"
-          value={gift.description}
-          onChange={(e) => handleInputChange(gift.id, e.target.name, e.target.value)}
-          placeholder="Description"
-        />
-      </TableCell>
-      <TableCell>
-        <TextField
-          name="price"
-          value={gift.price}
-          onChange={(e) => handleInputChange(gift.id, e.target.name, e.target.value)}
-          placeholder="Price"
-        />
-      </TableCell>
-      <TableCell>
-        <TextField
-          name="link"
-          value={gift.link}
-          onChange={(e) => handleInputChange(gift.id, e.target.name, e.target.value)}
-          placeholder="Link"
-        />
-      </TableCell>
-      <TableCell>
-        <Button variant="contained" color="secondary" onClick={() => handleSaveGift(gift.id, gift)}>
-          Save
-        </Button>
-        <Button variant="contained" color="error" onClick={() => handleCancelEdit(gift.id)}>
-          Cancel
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
+    const handleLocalChange = (e) => {
+      const { name, value } = e.target;
+      setLocalGift((prev) => ({
+        ...prev,
+        [name]: name === 'price' ? parseFloat(value) || '' : value,
+      }));
+    };
+
+    return (
+      <TableRow>
+        <TableCell>
+          <TextField
+            name="name"
+            value={localGift.name}
+            onChange={handleLocalChange}
+            placeholder="Name"
+          />
+        </TableCell>
+        <TableCell>
+          <TextField
+            name="description"
+            value={localGift.description}
+            onChange={handleLocalChange}
+            placeholder="Description"
+          />
+        </TableCell>
+        <TableCell>
+          <TextField
+            name="price"
+            value={localGift.price}
+            onChange={handleLocalChange}
+            placeholder="Price"
+          />
+        </TableCell>
+        <TableCell>
+          <TextField
+            name="link"
+            value={localGift.link}
+            onChange={handleLocalChange}
+            placeholder="Link"
+          />
+        </TableCell>
+        <TableCell>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => handleSaveGift(gift.id, localGift)}
+          >
+            Save
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => handleCancelEdit(gift.id)}
+          >
+            Cancel
+          </Button>
+        </TableCell>
+      </TableRow>
+    );
+  };
 
   const DisplayRow = ({ gift }) => {
     const truncateText = (text, maxLength) => 
