@@ -62,7 +62,7 @@ const Presentes = ({onGiftClick}) => {
         </Typography>
       </Grid>
       {gifts.map((gift) => (
-        <Grid item size={{ xs: 12, md: 4 }} key={gift.id}>
+        <Grid item size={{ xs: 12, md: 6 }} key={gift.id}>
           <Card>
             <CardMedia
               component="img"

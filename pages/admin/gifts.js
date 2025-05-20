@@ -6,6 +6,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import api from '@/app/api/actions';
 import AdminLayout from './layout';
 import { useMediaQuery } from '@mui/material';
+import UploadImageComponent from '@/app/components/uploadFile';
+
 
 const NewGift = () => {
   const [gifts, setGifts] = useState([]);
@@ -138,6 +140,12 @@ const NewGift = () => {
             fullWidth
             margin="dense"
           />
+          <UploadImageComponent
+            gift={localGift}
+            setLocalGift={setLocalGift}
+          >
+            
+          </UploadImageComponent>
         </CardContent>
         <CardActions>
           <Button
