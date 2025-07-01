@@ -79,6 +79,8 @@ let theme = createTheme({
 
 theme = responsiveFontSizes(theme);
 
+export const fontTheme = responsiveFontSizes(theme);
+
 const Home = () => {
   return (
     <ThemeProvider theme={theme}>

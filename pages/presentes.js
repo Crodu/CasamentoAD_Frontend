@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import api from '../app/api/actions';
 import PropTypes from 'prop-types';
-import { styled } from '@mui/material/styles';
+import { styled, ThemeProvider } from '@mui/material/styles';
 import QRCode from 'react-qr-code';
+
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
+
+import { fontTheme } from '@/app/page';
+import { Fleur_De_Leah } from 'next/font/google';
+
 import { 
   Modal, 
   Box, 
@@ -17,9 +23,37 @@ import {
   Alert,
 } from '@mui/material';
 
+const fleurDeLeah = Fleur_De_Leah({
+  variable: "--font-fleur-de-leah",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const giftTheme = {
+  ...fontTheme,
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          marginTop: '10px',
+          borderRadius: '20px', // Example: rounded corners
+          fontWeight: 'bold',   // Example: bold text
+          textTransform: 'none', // Example: normal case
+          // Add more custom styles as needed
+        },
+        containedPrimary: {
+          backgroundColor: '#e2f0f1', // Custom primary color
+          color: '#704526', // Custom text color
+        },
+      },
+    },
+  },
+}
+
 const StyledGrid = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(2),
   fontFamily: 'Arial, sans-serif',
+  backgroundColor: theme.palette.background.default,
 }));
 
 const Presentes = ({onGiftClick}) => {
@@ -55,65 +89,61 @@ const Presentes = ({onGiftClick}) => {
     );
 
   return (
-    <StyledGrid container spacing={3}>
-      <Grid item size={{ xs: 12 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Lista de Presentes
-        </Typography>
-      </Grid>
-      {gifts.map((gift) => (
-        <Grid item size={{ xs: 12, md: 6 }} key={gift.id}>
-          <Card>
-            <CardMedia
-              component="img"
-              height="140"
-              image={
-                gift.link ||
-                'https://placehold.co/600x400?text=Imagem+Indisponível'
-              }
-              alt={gift.name}
-            />
-            <CardContent>
-              <Grid container justifyContent="space-between" alignItems="center">
-                <Grid item xs={8}>
-                  <Typography variant="h6" component="div">
-                    {gift.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {gift.description}
-                  </Typography>
-                  <Typography variant="body1" color="text.primary" sx={{ marginTop: 1 }}>
-                    <strong>Preço:</strong> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price)}
-                  </Typography>
-                  </Grid>
-                <Grid item xs={4} container justifyContent="center" alignItems="center">
-                  {gift.bought_by ? (
-                    <Typography variant="body2" color="text.secondary" sx={{ marginTop: 1 }}>
-                      <strong>Comprado por:</strong><br/> {gift.bought_by}
-                    </Typography>
-                  ) : (
-                    <button
-                      style={{
-                        marginTop: '10px',
-                        padding: '8px 16px',
-                        backgroundColor: '#1976d2',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => {onGiftClick(gift)}}
-                    >
-                      Presentear
-                    </button>
-                  )}
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+    <ThemeProvider theme={giftTheme}>
+      <StyledGrid container spacing={3}>
+        <Grid item size={{ xs: 12 }}>
+          <Typography variant="h3" sx={{fontSize: '40pt'}} gutterBottom align='center'>
+            Presentes
+          </Typography>
         </Grid>
-      ))}
-    </StyledGrid>
+        {gifts.map((gift) => (
+          <Grid item size={{ xs: 12, md: 6 }} key={gift.id}>
+            <Card>
+              <CardMedia
+                component="img"
+                height="140"
+                image={
+                  gift.link ||
+                  'https://placehold.co/600x400?text=Imagem+Indisponível'
+                }
+                alt={gift.name}
+              />
+              <CardContent>
+                <Grid container justifyContent="space-between" alignItems="center">
+                  <Grid item xs={8}>
+                    <Typography variant="h6" component="div">
+                      {gift.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {gift.description}
+                    </Typography>
+                    <Typography variant="body1" color="text.primary" sx={{ marginTop: 1 }}>
+                      <strong>Preço:</strong> {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(gift.price)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4} container justifyContent="center" alignItems="center">
+                    {gift.bought_by ? (
+                      <Typography variant="body2" color="text.secondary" sx={{ marginTop: 1 }}>
+                        <strong>Comprado por:</strong><br/> {gift.bought_by}
+                      </Typography>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ marginTop: '10px' }}
+                        onClick={() => {onGiftClick(gift)}}
+                      >
+                        Presentear
+                      </Button>
+                    )}
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </StyledGrid>
+    </ThemeProvider>
   );
 };
 
@@ -132,9 +162,12 @@ const GiftModal = ({ open, onClose, gift }) => {
   const [email, setEmail] = useState('');
   const [lastName, setLastName] = useState('');
   const [qrCode, setQrCode] = useState('');
+  const [preferenceId, setPreferenceId] = useState(null);
+
+  initMercadoPago('TEST-65ba5db5-d043-4748-9939-469dafa14cad')
 
   const onSubmitOrder = async (gift, guest) => {
-    const data = await api.post('/ordergift', { 
+    const data = await api.post('/preference', { 
       gift_id: gift.id,
       guest_name: guest.name,
       guest_last_name: guest.lastName,
@@ -143,7 +176,9 @@ const GiftModal = ({ open, onClose, gift }) => {
 
     if (data.status === 200) {
       console.log('Order created successfully:', data.data);
-      setQrCode(data.data.qrcode);
+      // setQrCode(data.data.qrcode);
+      console.log(data);
+      setPreferenceId(data.data.preference.id);
     }
   }
 
@@ -167,6 +202,7 @@ const GiftModal = ({ open, onClose, gift }) => {
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
+          justifyItems: 'center',
         }}
       >
         <Typography variant="h6" component="h2" gutterBottom>
@@ -193,6 +229,13 @@ const GiftModal = ({ open, onClose, gift }) => {
           onChange={(e) => setEmail(e.target.value)}
           margin="normal"
         />
+        <div style={{ width: '300px' }}>
+        { preferenceId &&
+          <Wallet initialization={{ preferenceId: preferenceId }} 
+            locale='pt-BR'
+          />
+        }
+        </div>
         <Button
           variant="contained"
           color="primary"
