@@ -63,7 +63,8 @@ let theme = createTheme({
           borderRadius: 8, // Slightly rounded buttons
         },
         containedPrimary: {
-          color: '#8D6E63', // White text on primary buttons
+          color: '#8D6E63',
+          textShadow: 'none',
         }
       }
     },
@@ -82,6 +83,9 @@ theme = responsiveFontSizes(theme);
 export const fontTheme = responsiveFontSizes(theme);
 
 const Home = () => {
+
+  const year = 2025;
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -108,14 +112,14 @@ const Home = () => {
             08 . 11 . 2025
           </Typography>
 
-          <Button variant="outlined" color="primary" size="large" type="link" href="/presentes" sx={{ mb: 2 }}>
-            Presentes
-          </Button>
-          <Button variant="outlined" color="primary" size="large" type="link" href="/presentes" sx={{ mb: 2 }}>
+          <Button variant="contained" color="primary" size="large" type="link" href="/padrinhos" sx={{ mb: 2 }}>
             Padrinhos
           </Button>
+          <Button variant="contained" color="primary" size="large" type="link" href="/presentes" sx={{ mb: 2 }}>
+            Presentes
+          </Button>
           <Button
-            variant="text"
+            variant="contained"
             color="primary"
             size="large"
             href="#details"
@@ -224,9 +228,19 @@ const Home = () => {
 
           </Paper>
         </Container>
-        <Box component="footer" sx={{ py: 4, px: 2, backgroundColor: 'primary.main', textAlign: 'center' }}>
-          <Typography variant="body2" sx={{ color: 'text.primary', fontFamily: '"Roboto", sans-serif' }}>
-            © {new Date().getFullYear()} Desenvolvido com 💖 por André e Diovana
+        <Box sx={{ 
+          py: 4, 
+          px: 2, 
+          flexGrow: 0,
+          minHeight: '100vh',
+          backgroundImage: 'url(/folha.jpg)',
+          backgroundSize: 'cover',
+          }}>
+          
+        </Box>
+        <Box component="footer" sx={{ py: 4, px: 2, backgroundColor: '#ae9f84', textAlign: 'center' }}>
+          <Typography variant="body2" sx={{ color: 'black', fontFamily: '"Roboto", sans-serif' }}>
+            © {year} Desenvolvido com 💖 por André e Diovana
           </Typography>
         </Box>
       </Box>

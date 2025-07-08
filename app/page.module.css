@@ -176,7 +176,7 @@ a.secondary {
   text-align: center;
   padding: 48px 16px; /* Replace py and px with padding shorthand */
   height: 100vh;
-  background-image: url(/sky.jpg);
+  background-image: url(/home.jpg);
   background-size: cover;
   background-position: center;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
