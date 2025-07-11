@@ -1,8 +1,10 @@
-
 "use client";
+import React, { useEffect, useState } from 'react';
+import api from './api/actions';
 import Image from "next/image";
 import styles from "./page.module.css";
-import { Box, Container, Typography, Button, AppBar, Toolbar, Paper } from '@mui/material';
+import { Box, Container, Typography, Button, AppBar, Toolbar, Paper, Modal, TextField, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/styles';
 import { ExpandMore, TextRotationAngledown } from "@mui/icons-material";
 // import localFont from 'next/font/local';
@@ -65,6 +67,12 @@ let theme = createTheme({
         containedPrimary: {
           color: '#8D6E63',
           textShadow: 'none',
+        },
+        containedSecondary: {
+          color: '#8D6E63',
+          border: "2px solid #784d47",
+          backgroundColor: '#e6cab1',
+          textShadow: 'none',
         }
       }
     },
@@ -83,8 +91,95 @@ theme = responsiveFontSizes(theme);
 export const fontTheme = responsiveFontSizes(theme);
 
 const Home = () => {
-
   const year = 2025;
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [error, setError] = useState({ name: false, cpf: false });
+  const [fetchedInvite, setFetchedInvite] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [presenceConfirmed, setPresenceConfirmed] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    setName('');
+    setCpf('');
+    setError({ name: false, cpf: false });
+    setFetchedInvite("");
+  };
+
+  const handleConfirm = async () => {
+    let hasError = false;
+    let err = { name: false, cpf: false };
+    if (!name.trim()) {
+      err.name = true;
+      hasError = true;
+    }
+    if (!cpf.trim()) {
+      err.cpf = true;
+      hasError = true;
+    }
+    setError(err);
+    if (!hasError) {
+      // Here you could send the data to an API or handle as needed
+      await api.post(`invites/${fetchedInvite}/guest`, {
+        name: name,
+        cpf: cpf,
+      });
+      setPresenceConfirmed(true);
+      // alert('Presença confirmada!');
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id && !loaded) {
+      const fetchInvite = async () => {
+        try {
+          console.log('Fetching invite with ID:', id);
+          const data = await api.get('/invites/' + id);
+          if (data.data?.guest_id) {
+            console.log('Invite fetched:', data.data);
+            return
+          }else{
+            console.log('No guest_id found in invite data:', data.data);
+            setFetchedInvite(data.data.uuid);
+          }
+        } catch (err) {
+          console.error('Erro ao buscar convite:', err);
+        } finally {
+          setLoaded(true);
+        }
+      }
+      fetchInvite();
+    }
+  }, [fetchedInvite, loaded]);
+
+  const presenceConfirmedModal = () => {
+    return (
+      <>
+        <Typography variant="h6" component="h2" sx={{ mb: 2, color: '#8D6E63' }}>
+          Presença Confirmada!
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 3, color: '#8D6E63' }}>
+          Obrigado por confirmar sua presença. Estamos ansiosos para celebrar este momento especial com você!
+        </Typography>
+        <Button variant="contained" color="primary" onClick={handleClose} fullWidth>
+          Fechar
+        </Button>
+      </>
+    )
+  };
+
+  const formatCpf = (value) => {
+    return value
+      .replace(/\D/g, '') // Remove non-numeric characters
+      .replace(/(\d{3})(\d)/, '$1.$2') // Add dot after first 3 digits
+      .replace(/(\d{3})(\d)/, '$1.$2') // Add dot after next 3 digits
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Add dash
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -92,57 +187,123 @@ const Home = () => {
         {/* Barra de Navegação Opcional */}
 
         {/* Seção Hero */}
-        <Box
-          className={styles.hero}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            textAlign: 'center',
-            position: 'relative',
-            minHeight: { xs: 350, md: 450 },
-          }}
-        >
-          <Typography variant="h1" gutterBottom sx={{ fontSize: { xs: '3.5rem', md: '5rem' } }}>
-            André & Diovana
-          </Typography>
-          <Typography variant="h5" component="p" sx={{ fontSize: { xs: '1rem', md: '1.25rem' }, mb: 4 }}>
-            08 . 11 . 2025
-          </Typography>
-
-          <Button variant="contained" color="primary" size="large" type="link" href="/padrinhos" sx={{ mb: 2 }}>
-            Padrinhos
-          </Button>
-          <Button variant="contained" color="primary" size="large" type="link" href="/presentes" sx={{ mb: 2 }}>
-            Presentes
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            href="#details"
+          <Box
+            className={styles.hero}
             sx={{
-              position: 'absolute',
-              bottom: 24,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              mb: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              textAlign: 'center',
+              position: 'relative',
+              minHeight: { xs: 350, md: 450 },
             }}
           >
-            <ExpandMore sx={{
-              animation: 'jump 1.2s infinite',
-              '@keyframes jump': {
-                '0%, 100%': { transform: 'translateX(-50%) translateY(0)' },
-                '20%': { transform: 'translateX(-50%) translateY(-10px)' },
-                '40%': { transform: 'translateX(-50%) translateY(0)' },
-              },
-            }} />
-            Saiba mais
-          </Button>
-        </Box>
-        {/* Área Principal de Conteúdo */}
+            <Typography variant="h1" gutterBottom sx={{ fontSize: { xs: '3.5rem', md: '5rem' } }}>
+              André & Diovana
+            </Typography>
+            <Typography variant="h5" component="p" sx={{ fontSize: { xs: '1rem', md: '1.25rem' }, mb: 4 }}>
+              08 . 11 . 2025
+            </Typography>
+
+            <Button variant="contained" color="primary" size="large" type="link" href="/padrinhos" sx={{ mb: 2 }}>
+              Padrinhos
+            </Button>
+            <Button variant="contained" color="primary" size="large" type="link" href="/presentes" sx={{ mb: 2 }}>
+              Presentes
+            </Button>
+            <Modal
+              open={fetchedInvite !== ""}
+              onClose={handleClose}
+              aria-labelledby="modal-title"
+              aria-describedby="modal-description"
+            >
+              <Box sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 320,
+                bgcolor: 'background.paper',
+                border: '2px solid #e6cab1',
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+                <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{ position: 'absolute', right: 8, top: 8, color: '#8D6E63' }}
+                >
+            <CloseIcon />
+                </IconButton>
+                {!presenceConfirmed ? (
+            <>
+              <Typography id="modal-title" variant="h6" component="h2" sx={{ mb: 2, color: '#8D6E63' }}>
+                Confirme sua presença
+              </Typography>
+              <Typography id="modal-description" variant="body2" sx={{ mb: 3, color: '#8D6E63' }}>
+                Por favor, preencha seus dados para confirmar sua presença. (Obs: O convite é único e não pode ser compartilhado)
+              </Typography>
+              <TextField
+                label="Nome"
+                variant="outlined"
+                fullWidth
+                value={name}
+                onChange={e => setName(e.target.value)}
+                error={error.name}
+                helperText={error.name ? 'Por favor, insira seu nome.' : ''}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label="CPF"
+                variant="outlined"
+                fullWidth
+                value={cpf}
+                onChange={e => setCpf(formatCpf(e.target.value))}
+                error={error.cpf}
+                helperText={error.cpf ? 'Por favor, insira seu CPF.' : ''}
+                sx={{ mb: 3 }}
+                inputProps={{ maxLength: 14 }}
+              />
+              <Button variant="contained" color="primary" onClick={handleConfirm} fullWidth>
+                Confirmar
+              </Button>
+            </>
+                ) : (
+            presenceConfirmedModal()
+                )}
+              </Box>
+            </Modal>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              href="#details"
+              sx={{
+                position: 'absolute',
+                bottom: 24,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                mb: 0,
+              }}
+            >
+              <ExpandMore sx={{
+                animation: 'jump 1.2s infinite',
+                '@keyframes jump': {
+            '0%, 100%': { transform: 'translateX(-50%) translateY(0)' },
+            '20%': { transform: 'translateX(-50%) translateY(-10px)' },
+            '40%': { transform: 'translateX(-50%) translateY(0)' },
+                },
+              }} />
+              Saiba mais
+            </Button>
+          </Box>
+          {/* Área Principal de Conteúdo */}
         <Container maxWidth="md" sx={{
           py: { xs: 4, md: 8 },
           px: { xs: 0, md: 4 },
@@ -235,6 +396,7 @@ const Home = () => {
           minHeight: '100vh',
           backgroundImage: 'url(/folha.jpg)',
           backgroundSize: 'cover',
+          backgroundPosition: 'center',
           }}>
           
         </Box>

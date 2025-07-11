@@ -25,6 +25,9 @@ const AdminLayout = ({ children }) => {
         <ListItem button component={Link} href="/admin/guests" sx={{ '&:hover': { backgroundColor: '#e0e0e0' } }}>
           <ListItemText primary="Guests" />
         </ListItem>
+        <ListItem button component={Link} href="/admin/invites" sx={{ '&:hover': { backgroundColor: '#e0e0e0' } }}>
+          <ListItemText primary="Invites" />
+        </ListItem>
         <ListItem button component={Link} href="/admin/gifts" sx={{ '&:hover': { backgroundColor: '#e0e0e0' } }}>
           <ListItemText primary="Gifts" />
         </ListItem>
