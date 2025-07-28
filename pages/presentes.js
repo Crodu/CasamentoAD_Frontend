@@ -66,7 +66,8 @@ const Presentes = ({onGiftClick}) => {
     const fetchGifts = async () => {
       try {
         const data = await api.get('/gifts');
-        setGifts(data.data); // Adjust if your API returns data in a different structure
+        const randomGifts = data.data.sort(() => 0.5 - Math.random()).slice(0, 17);
+        setGifts(randomGifts); // Adjust if your API returns data in a different structure
       } catch (err) {
         setError('Erro ao carregar presentes!');
       } finally {
