@@ -95,7 +95,8 @@ const Home = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [cpf, setCpf] = useState('');
-  const [error, setError] = useState({ name: false, cpf: false });
+  const [carPlate, setCarPlate] = useState('');
+  const [error, setError] = useState({ name: false, cpf: false, carPlate: false });
   const [fetchedInvite, setFetchedInvite] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [presenceConfirmed, setPresenceConfirmed] = useState(false);
@@ -126,6 +127,7 @@ const Home = () => {
       await api.post(`invites/${fetchedInvite}/guest`, {
         name: name,
         cpf: cpf,
+        phone: carPlate,
       });
       setPresenceConfirmed(true);
       // alert('Presença confirmada!');
@@ -258,6 +260,17 @@ const Home = () => {
                 error={error.name}
                 helperText={error.name ? 'Por favor, insira seu nome.' : ''}
                 sx={{ mb: 2 }}
+              />
+              <TextField
+                label="Placa do Carro (Muito importante!)"
+                variant="outlined"
+                fullWidth
+                value={carPlate}
+                onChange={e => setCarPlate(e.target.value)}
+                error={error.carPlate}
+                helperText={error.carPlate ? 'Por favor, insira a placa do carro.' : ''}
+                sx={{ mb: 3 }}
+                inputProps={{ maxLength: 14 }}
               />
               <TextField
                 label="CPF"
